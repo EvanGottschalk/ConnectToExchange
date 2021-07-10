@@ -134,7 +134,7 @@ Contributions are what make the open source community such an amazing place to b
 <!-- LICENSE -->
 ## License
 
-No license has been selected for this project.
+Distributed under the GNU GPL-3 License. See `LICENSE` for more information.
 
 
 
