@@ -63,7 +63,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-I started working on `ConnectToExchange` in 2017 during the last big bitcoin hype. Its purpose is to creating the initial connection with an exchange, and to fetch basic information from the exchange, such as public price data or one's own personal trading history.
+I started working on `ConnectToExchange` in 2017 during the last big bitcoin hype. Its purpose is to create the initial connection with an exchange, and to fetch basic information from the exchange, such as public price data or one's own personal trading history.
 
 `ConnectToExchange` can be used on its own to gather information. It can also be imported into other modules to grant them the ability to communicate with exchanges, such as a module for executing trades. `ConnectToExchange` has no function for actually executing a trade itself.
 
