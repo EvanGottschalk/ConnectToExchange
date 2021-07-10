@@ -160,15 +160,15 @@ Project Link: [https://github.com/EvanGottschalk/ConnectToExchange](https://gith
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/EvanGottschalk/repo.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/EvanGottschalk/ConnectToExchange.svg?style=for-the-badge
 [contributors-url]: https://github.com/EvanGottschalk/ConnectToExchange/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/EvanGottschalk/repo.svg?style=for-the-badge
+[forks-shield]: https://img.shields.io/github/forks/EvanGottschalk/ConnectToExchange.svg?style=for-the-badge
 [forks-url]: https://github.com/EvanGottschalk/ConnectToExchange/network/members
-[stars-shield]: https://img.shields.io/github/stars/EvanGottschalk/repo.svg?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/EvanGottschalk/ConnectToExchange.svg?style=for-the-badge
 [stars-url]: https://github.com/EvanGottschalk/ConnectToExchange/stargazers
-[issues-shield]: https://img.shields.io/github/issues/EvanGottschalk/repo.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/EvanGottschalk/ConnectToExchange.svg?style=for-the-badge
 [issues-url]: https://github.com/EvanGottschalk/ConnectToExchange/issues
-[license-shield]: https://img.shields.io/github/license/EvanGottschalk/repo.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/EvanGottschalk/ConnectToExchange.svg?style=for-the-badge
 [license-url]: https://github.com/EvanGottschalk/ConnectToExchange/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/EvanGottschalk
