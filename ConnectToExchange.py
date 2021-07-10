@@ -47,7 +47,7 @@ class ConnectToExchange:
             self.CE = CustomEncryptor()
         except:
             try:
-                self.CE = CustomEncryptor
+                self.CE = CustomEncryptor.CustomEncryptor()
             except:
                 self.CE = False
     # The improved_columns are simply the normal columns of an OHLCV, but with capitalization and a 'Time' column added. This variable helps with CSV exports
