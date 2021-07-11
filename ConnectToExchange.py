@@ -58,6 +58,10 @@ class ConnectToExchange:
     # The Daily Activity Logs are broken up into individual days
         self.activityLog_Current = {}
         self.activity_log_location = 'ConnectToExchange/Activity Logs/'
+        try:
+            os.makedirs('ConnectToExchange/Activity Logs')
+        except Exception:
+            pass
         self.errorLog = []
     # This dict stores the API information for each account & exchange
     # Fill this in with the exchanges & account names you use
@@ -84,12 +88,14 @@ class ConnectToExchange:
                                          'Time of Acccess': str(datetime.now())}
     # EMA_smoother is an int that is used in calculating exponential moving averages. The most common value to use is 2. Feel free to change it
         self.EMA_smoother = 2
+        self.exchange = False
 
     def main_loop(self):
-        exchange = self.connect()
-    # I run getOHLCVs() on the 1 minute timeframe in the main loop to build up OHLCV data on my own machine via updateMasterOHLCVs()
-    # This is useful because it is usually difficult to get minute-to-minute data through APIs unless the data is very recent
-        self.getOHLCVs('default', 'BTC', '1m', 1999, {}, 'no')
+        print('CTE : main_loop initiated')
+##        exchange = self.connect()
+##    # I run getOHLCVs() on the 1 minute timeframe in the main loop to build up OHLCV data on my own machine via updateMasterOHLCVs()
+##    # This is useful because it is usually difficult to get minute-to-minute data through APIs unless the data is very recent
+##        self.getOHLCVs('default', 'BTC', '1m', 1999, {}, 'no')
 
 # This function is for connecting to exchanges using API keys
     def connect(self, *args):
@@ -185,7 +191,7 @@ class ConnectToExchange:
         try:
             self.activityLog_Daily = pickle.load(open(self.activity_log_location + exchange_name + '_ActivityLog_Daily_' + date + '.pickle', 'rb'))
             if not(self.silent_mode):
-                print('CTE : Daily Activity Log loaded!\n')
+                print('CTE : Daily Activity Log loaded!')
         except:
             self.activityLog_Daily = {'Date': date, \
                                       'Activity Log': {}}
@@ -279,39 +285,59 @@ class ConnectToExchange:
                     print('        ' + key + ': ' + str(positions_dict[key]))
         return(positions_dict)
 
-# This function fetches the user's transaction history of the input symbol
-    def getTransactionHistory(self, parameter_dict):
-    # Establish parameters from parameter_dict
-        try:
-            self.exchange = parameter_dict['Exchange']
-            self.exchange.fetchTicker('BTC/USDT')
-        except:
+# This function fetches the user's transaction history
+# Users choose the symbol to look up, the type of transaction to look up, and the number of days of history they would like to see
+    def getTransactionHistory(self, *args):
+        if not(self.exchange):
+            self.connect()
+        if len(args) == 3:
+            symbol = args[0]
+            transaction_type = args[1]
+            number_of_days = args[2]
+        if len(args) == 2:
+            symbol = args[0]
+            transaction_type = args[1]
+            number_of_days = False
+        elif len(args) == 1:
+            symbol = args[0]
+            transaction_type = False
+            number_of_days = False
+        elif len(args) == 0:
+            symbol = False
+            transaction_type = False
+            number_of_days = False
+        while not(symbol):
+            symbol = input("\nWhich symbol's transaction history would you like?\n").upper()
+            if not(symbol.isalpha()):
+                print('INPUT ERROR! Please enter the abbreviation of a cryptocurrency.')
+                symbol = False
+        while not(transaction_type):
+            transaction_type = input("\nWhich type of transaction would you like?\n(1) Trade\n(2) Funding\n\nTransaction Type: ")
+            if transaction_type == '1' or transaction_type.lower() == 'trade':
+                transaction_type = 'Trade'
+            elif transaction_type == '2' or transaction_type.lower() == 'funding':
+                transaction_type = 'Funding'
+            if (transaction_type != 'Trade') and (transaction_type != 'Funding'):
+                print('INPUT ERROR! Please enter "1", "2", "trade" or "funding".')
+                transaction_type = False
+        while not(number_of_days):
+            number_of_days = input("\nHow many days of history would you like?\n")
             try:
-                self.connect(parameter_dict['Exchange'])
+                number_of_days = int(number_of_days)
+                square_root = math.sqrt(number_of_days)
             except:
-                self.connect(self.exchangeAccounts['Default'])
-        try:
-            symbol = parameter_dict['Symbol']
-        except:
-            if self.currentConnectionDetails['Exchange Name'] == 'Binance':
-                symbol = input("\nWhich symbol's transaction history would you like?\n")
-            else:
-                symbol = 'BTC/USD'
-        try:
-            transaction_type = parameter_dict['Transaction Type']
-        except:
-            transaction_type = ['Trade', 'Funding']
-    # Users may specify the number of days of trading they'd like to retrieve
-        try:
-            number_of_days = parameter_dict['Number of Days']
-        except:
-            number_of_days = 10
+                print('INPUT ERROR! Please enter a positive integer.')
+                number_of_days = False
+        if symbol == 'BTC':
+            symbol = 'BTC/USD'
+        elif len(symbol) < 5:
+            symbol = symbol + '/BTC'
     # fetchMyTrades() retrieves the raw transaction history using CCXT
         rawTransactionHistory = self.exchange.fetchMyTrades(symbol, since=self.exchange.milliseconds() - (86400000 * number_of_days))
         transaction_history_dict = {}
         cleaned_history_dict = {}
         index = 0
-    # This for loop tidies up the transacctions to be readable in a CSV
+    # This for loop tidies up the transactions to be readable in a CSV
         for transaction in rawTransactionHistory:
             if transaction['info']['tradeType'] in transaction_type:
                 additional_dict = {}
@@ -329,7 +355,7 @@ class ConnectToExchange:
         transaction_history_Dataframe = pd.DataFrame(cleaned_history_dict)
         transaction_history_Dataframe = transaction_history_Dataframe.transpose()
         transaction_history_Dataframe.to_csv('Transaction History.csv')
-        #return(self.transactionHistory_Master)
+        return(transaction_history_Dataframe)
 
                 
 # This function retrieves one's current account balances
