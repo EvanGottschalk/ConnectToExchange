@@ -33,9 +33,11 @@ import ccxt
 ##root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ##sys.path.append(root + '/python')
 
+# This function will create the ConnectToExchange class in a non-local scope, making it more secure
 def main():
     CTE = ConnectToExchange()
     CTE.main_loop()
+    del CTE
 
 class ConnectToExchange:
     def __init__(self):
@@ -86,16 +88,19 @@ class ConnectToExchange:
         self.currentConnectionDetails = {'Exchange Name': '',
                                          'Account Name': '', \
                                          'Time of Acccess': str(datetime.now())}
+    # availableSymbols contains lists of the cryptocurrencies tradeable on a given exchange
+    # Whenever connect() is used, availableSymbols will be updated to have the exchange name as a new key and a list of the available symbols as the value
+        self.availableSymbols = {}
     # EMA_smoother is an int that is used in calculating exponential moving averages. The most common value to use is 2. Feel free to change it
         self.EMA_smoother = 2
         self.exchange = False
 
     def main_loop(self):
         print('CTE : main_loop initiated')
-##        exchange = self.connect()
+        exchange = self.connect()
 ##    # I run getOHLCVs() on the 1 minute timeframe in the main loop to build up OHLCV data on my own machine via updateMasterOHLCVs()
 ##    # This is useful because it is usually difficult to get minute-to-minute data through APIs unless the data is very recent
-##        self.getOHLCVs('default', 'BTC', '1m', 1999, {}, 'no')
+        self.getOHLCVs('default', 'BTC', '1m', 1999, {}, 'no')
 
 # This function is for connecting to exchanges using API keys
     def connect(self, *args):
@@ -176,6 +181,7 @@ class ConnectToExchange:
         date = self.GCT.getDateString()
         timestamp = self.GCT.getTimeStamp()
         time = self.GCT.getTimeString()
+        self.availableSymbols[exchange_name] = list(self.exchange.loadMarkets())
       # This section creates new entries in the Master Activity Log and Daily Activity Logs if they have not been used yet
         try:
             self.activityLog_Master = pickle.load(open(self.activity_log_location + exchange_name + '_ActivityLog_Master.pickle', 'rb'))
@@ -1174,7 +1180,7 @@ class ConnectToExchange:
         print('CTE : Pause over! Returning to ' + description)
         return(error_dict)
         
-# This function will run create the ConnectToExchange class in a non-local scope, making it more secure
+# This will create the ConnectToExchange class in a non-local scope, making it more secure
 if __name__ == "__main__":
     main()
 
