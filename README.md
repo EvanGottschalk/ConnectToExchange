@@ -85,7 +85,7 @@ I started working on `ConnectToExchange` in 2017 during the last big bitcoin hyp
 
 ### Prerequisites
 
-Before using `ConnectToExchange`, users must obtain an API key and secret from the cryptocurrency exchange of their choosing.
+Before using `ConnectToExchange`, you must first obtain an API key and secret from the cryptocurrency exchange of their choosing. You also need to install the [`CCXT`](https://github.com/ccxt/ccxt) library.
 
 ### Installation
 
@@ -93,11 +93,15 @@ Before using `ConnectToExchange`, users must obtain an API key and secret from t
    ```sh
    pip install ccxt
    ```
-2. Download `ConnectToExchange.py`, `GetCurrentTime.py`, and optionally `AudioPlayer.py`
+2. Download the `.py` files in from this repository (`ConnectToExchange.py`, `GetCurrentTime.py`, and optionally `AudioPlayer.py`).
 
-3. In the same folder as `ConnectToExchange`, create a `.txt` file. If your API key is `view-only`, you can save your cryptocurrency exchange API key on the 1st line, and your API secret on the 2nd. However, if your API key has `trade` priveleges, you should save an encrypted version of both your key and secret on those lines instead.
+3. In the same folder as `ConnectToExchange.py`, create a `.txt` file to store your API information. Its name should start with the exchange you are using, followed by an underscore, followed by the name of the account you're using, and ending with `_API.txt`.
 
-To encrypt your API information, I recommend using `CustomEncryptor.py`, which can be downloaded here: [github.com/EvanGottschalk/CustomEncryptor](https://github.com/EvanGottschalk/CustomEncryptor)
+  For example, if you are using your **Main** account on **Coinbase**, you would name the `.txt` file **`Coinbase_Main_API.txt`**
+
+  If your API key is `view-only`, you can save your cryptocurrency exchange API key on the 1st line, and your API secret on the 2nd. However, **if your API key has `trade` priveleges, you should save an encrypted version of both your key and secret on those lines instead.**
+
+  To encrypt your API information, I recommend using `CustomEncryptor.py`, which can be downloaded here: [github.com/EvanGottschalk/CustomEncryptor](https://github.com/EvanGottschalk/CustomEncryptor)
 
 4. Run `ConnectToExchange.py`
 
