@@ -74,6 +74,10 @@ I started working on `ConnectToExchange` in 2017 during the last big bitcoin hyp
 
 [`CCXT`](https://github.com/ccxt/ccxt) - The fantastic `CCXT` library is critical to `ConnectToExchange`. Huge thanks to [@kroitor](https://github.com/kroitor) and the many other `CCXT` contributors that made this program possible.
 
+`GetCurrentTime` - This program is imported to help collect time data in a legible fashion. It also allows for the translation of time stamps.
+
+`AudioPlayer` - This is a simple program for playing custom audio alerts. It can be used with `ConnectToExchange` to warn you if an error occurs.
+
 
 
 <!-- GETTING STARTED -->
@@ -90,7 +94,7 @@ After installing [`CCXT`](https://github.com/ccxt/ccxt), users can download and 
    ```
 2. Download `ConnectToExchange`
 
-3. In the same folder as `ConnectToExchange`, create a `.txt` file. If your API key is `view-only`, you can save your cryptocurrency exchange API key on the 1st line, your API secret on the 2nd. However, if your API key has `trade` priveleges, you should save an encrypted version of both your key and secret instead.
+3. In the same folder as `ConnectToExchange`, create a `.txt` file. If your API key is `view-only`, you can save your cryptocurrency exchange API key on the 1st line, and your API secret on the 2nd. However, if your API key has `trade` priveleges, you should save an encrypted version of both your key and secret instead.
 
 To encrypt your API information, I recommend using `CustomEncryptor.py`, which can be downloaded here: github.com/EvanGottschalk/CustomEncryptor'
 
