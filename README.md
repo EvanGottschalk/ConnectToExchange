@@ -74,9 +74,9 @@ I started working on `ConnectToExchange` in 2017 during the last big bitcoin hyp
 
 [`CCXT`](https://github.com/ccxt/ccxt) - The fantastic `CCXT` library is critical to `ConnectToExchange`. Huge thanks to [@kroitor](https://github.com/kroitor) and the many other `CCXT` contributors that made this program possible.
 
-`GetCurrentTime` - This program is imported to help collect time data in a legible fashion. It also allows for the translation of time stamps.
+[`GetCurrentTime`](https://github.com/EvanGottschalk/GetCurrentTime) - This program is imported to help collect time data in a legible fashion. It also allows for the translation of time stamps. You can read more about it here: [github.com/EvanGottschalk/GetCurrentTime](https://github.com/EvanGottschalk/GetCurrentTime)
 
-`AudioPlayer` - This is a simple program for playing custom audio alerts. It can be used with `ConnectToExchange` to warn you if an error occurs.
+[`AudioPlayer`](https://github.com/EvanGottschalk/AudioPlayer) - This is a simple program for playing custom audio alerts. It can be used with `ConnectToExchange` to warn you if an error occurs. You can read more about it here: [github.com/EvanGottschalk/AudioPlayer](https://github.com/EvanGottschalk/AudioPlayer)
 
 
 
