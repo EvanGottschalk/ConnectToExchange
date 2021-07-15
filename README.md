@@ -83,8 +83,9 @@ I started working on `ConnectToExchange` in 2017 during the last big bitcoin hyp
 <!-- GETTING STARTED -->
 ## Getting Started
 
-Before using `ConnectToExchange`, users must obtain an API key and secret from the cryptocurrency exchange of their choosing.
+### Prerequisites
 
+Before using `ConnectToExchange`, users must obtain an API key and secret from the cryptocurrency exchange of their choosing.
 
 ### Installation
 
