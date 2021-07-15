@@ -59,9 +59,9 @@ class ConnectToExchange:
     # The Master Activity Log has every action from all time
     # The Daily Activity Logs are broken up into individual days
         self.activityLog_Current = {}
-        self.activity_log_location = 'ConnectToExchange/Activity Logs/'
+        self.activity_log_location = 'Activity Logs/'
         try:
-            os.makedirs('ConnectToExchange/Activity Logs')
+            os.makedirs(self.activity_log_location)
         except Exception:
             pass
         self.errorLog = []
