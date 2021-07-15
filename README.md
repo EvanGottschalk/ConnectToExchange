@@ -112,13 +112,13 @@ Before using `ConnectToExchange`, you must first obtain an API key and secret fr
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Checking Prices - A quick, simple, and handy feature of `ConnectToExchange` is its ease of acquiring the current price of an asset of your desire. This can be incorporated into all sorts of other programs.
+**Checking Prices** - A quick, simple, and handy feature of `ConnectToExchange` is its ease of acquiring the current price of an asset of your desire. This can be incorporated into all sorts of other programs.
 
-Checking Orders - You can use `ConnectToExchange` to check the status of your orders to see if they are open or have been filled. If they have been filled, you can then use the closing information to calculate profits/losses.
+**Checking Orders** - You can use `ConnectToExchange` to check the status of your orders to see if they are open or have been filled. If they have been filled, you can then use the closing information to calculate profits/losses.
 
-Accumulating OHCLVs - If you run `ConnectToExchange` on a regular basis, it will accumulate OHLCV information in a Master OHLCV. This is handy if you want to really analyze granular price action over the long term. Normally, exchanges limit how many data points you can retrieve all at once. On Binance, for example, you are limited to only 500 data points. So, if you want to know the price every minute for the past 600 minutes, you're out of luck - unless you ran `ConnectToExchange` the previous day. Based on how granular you need the information to be, so long as you run `ConnectToExchange` regularly, you can completely overcome the limits set by the exchanges.
+**Accumulating OHCLVs** - If you run `ConnectToExchange` on a regular basis, it will accumulate OHLCV information in a Master OHLCV. This is handy if you want to really analyze granular price action over the long term. Normally, exchanges limit how many data points you can retrieve all at once. On Binance, for example, you are limited to only 500 data points. So, if you want to know the price every minute for the past 600 minutes, you're out of luck - unless you ran `ConnectToExchange` the previous day. Based on how granular you need the information to be, so long as you run `ConnectToExchange` regularly, you can completely overcome the limits set by the exchanges.
 
-A Whole Lot More - The breadth of ways `ConnectToExchange` can be used in other programs is limitless. Any module that could benefit from accessing cryptocurrency prices and their relationships to each other can use `ConnectToExchange` to quickly attain that feature.
+**A Whole Lot More** - The breadth of ways `ConnectToExchange` can be used in other programs is limitless. Any module that could benefit from accessing cryptocurrency prices and their relationships to each other can use `ConnectToExchange` to quickly attain that feature.
 
 <!-- ROADMAP -->
 ## Roadmap
