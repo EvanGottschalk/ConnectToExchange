@@ -61,7 +61,7 @@ class ConnectToExchange:
         self.activityLog_Current = {}
         self.activity_log_location = 'Activity Logs/'
         try:
-            os.makedirs(self.activity_log_location)
+            os.makedirs('ConnectToExchange/Activity Logs')
         except Exception:
             pass
         self.errorLog = []
@@ -84,7 +84,9 @@ class ConnectToExchange:
                                             'Long 50x Quick': {'apiKey': '', 'secret': ''}, \
                                             'Short 50x Quick': {'apiKey': '', 'secret': ''}, \
                                             'Monty': {'apiKey': '', 'secret': ''}}, \
-                                 'Default': 'Kraken Main'}
+                                 'Default': 'Kraken Main', \
+                                 'Default Exchange': 'Kraken', \
+                                 'Default Account': 'Main'}
         self.currentConnectionDetails = {'Exchange Name': '',
                                          'Account Name': '', \
                                          'Time of Acccess': str(datetime.now())}
@@ -113,13 +115,15 @@ class ConnectToExchange:
                 except:
                     exchange_name = input('To which exchange would you like to connect?\n    Exchange Name: ')
                     account_name = input('Which account on that exchange would you like to use?\n    Account Name: ')
-            if len(args) == 1:
+            elif len(args) == 1:
             # This is for the case where the user inputs a dictionary containing the exchange & account names
                 if type(args[0]) == dict:
                     exchange_name = args[0]['Exchange Name']
                     account_name = args[0]['Account Name']
             # This else is for the case where the user enters the exchange name and the account name all at once
                 else:
+                    if args[0].lower() == 'default':
+                        args = [self.exchangeAccounts['Default']]
                     split_name = args[0].split(' ')
                     exchange_name = split_name[0]
                     split_account_name = split_name[1:len(split_name)]
@@ -132,6 +136,11 @@ class ConnectToExchange:
             elif len(args) == 2:
                 exchange_name = args[0]
                 account_name = args[1]
+        # This swaps in the default exchange or account if 'default' was used as an input
+            if exchange_name.lower() == 'default':
+                exchange_name = self.exchangeAccounts['Default Exchange']
+            if account_name.lower() == 'default':
+                account_name = self.exchangeAccounts['Default Account']                
         # The exchange name & account have been chosen. Now the appropriate API information is retrieved
             if self.exchangeAccounts[exchange_name][account_name]['apiKey'] == '':
                 self.fetch_API_key(exchange_name, account_name)
