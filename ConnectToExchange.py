@@ -1,4 +1,4 @@
-# PURPOSE - This program is for connecting to cryptocurrency exchanges using the CCXT library, and for retrieving information from them
+# This program is for connecting to and retrieving information from cryptocurrency exchanges using the CCXT library
 
 import os
 import sys
@@ -17,17 +17,9 @@ from AudioPlayer import AudioPlayer
 from GetCurrentTime import GetCurrentTime
 
 # CustomEncryptor.py is used to access encrypted API keys
-try:
-    from CustomEncryptor import CustomEncryptor
-except:
-    try:
-        from CustomEncryptor.CustomEncryptor import CustomEncryptor
-    except:
-        print('CTE : ERROR! CustomEncryptor.py not found!')
-        print('CTE : If your API keys have trade priveledges, be sure to save them with encryption. I recommend using ' + \
-              'CustomEncryptor.py, which can be downloaded here: github.com/EvanGottschalk/CustomEncryptor')
+from CustomEncryptor import CustomEncryptor
 
-# ccxt is the fantastic library that makes the interaction with cryptocurrency exchanges possible
+# CCXT is the fantastic library that makes the interaction with cryptocurrency exchanges possible
 import ccxt
 
 # I ultimately stopped using this root assignment, but I may add it back
@@ -42,29 +34,22 @@ def main():
 
 class ConnectToExchange:
     def __init__(self):
-    # Toggle silent_mode to True to prevent all print statements that aren't error messages. 
+    # Toggle silent_mode to True to prevent all print statements that aren't error messages
         self.silent_mode = False
         self.GCT = GetCurrentTime()
         self.AP = AudioPlayer()
-        try:
-            self.CE = CustomEncryptor()
-        except:
-            try:
-                self.CE = CustomEncryptor.CustomEncryptor()
-            except:
-                self.CE = False
+        self.CE = CustomEncryptor.CustomEncryptor()
     # The improved_columns are simply the normal columns of an OHLCV, but with capitalization and a 'Time' column added. This variable helps with CSV exports
         self.improved_columns = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'Time']
+    # The timeframes_All dict contains the most common time durations that cryptocurrency exchanges use in graphs of price over time
         self.timeframes_All = {'1m': '1m', '3m': '3m', '5m': '5m', '15m': '15m', '30m': '30m', '1h': '1h', '2h': '2h', '4h': '4h', '6h': '6h', '8h': '8h', '12h': '12h', '1d': '1d', '3d': '3d', '1w': '1w', '1M': '1M'}
-    # The activity logs are a history of every connection or other exchange-related action that's been made
+    # The activity logs are a history of every connection or other exchange-related action that has been made
     # The Master Activity Log has every action from all time
     # The Daily Activity Logs are broken up into individual days
         self.activityLog_Current = {}
         self.activity_log_location = 'Activity Logs/'
-        try:
+        if not(os.path.isdir('ConnectToExchange/Activity Logs')):
             os.makedirs('ConnectToExchange/Activity Logs')
-        except Exception:
-            pass
         self.errorLog = []
     # This dict stores the API information for each account & exchange
     # Fill this in with the exchanges & account names you use
@@ -292,11 +277,11 @@ class ConnectToExchange:
                 positions = self.exchange.fetch_positions(None, {'currency':'BTC'})
             except Exception as error:
                 positions = False
-                self.inCaseOfError(**{'Error': error, \
-                                      'Description': 'fetching positions', \
-                                      'Program': 'CTE', \
-                                      'Line #': traceback.format_exc().split('line ')[1].split(',')[0], \
-                                      '# of Attempts': number_of_attempts})
+                self.inCaseOfError(**{'error': error, \
+                                      'description': 'fetching positions', \
+                                      'program': 'CTE', \
+                                      'line_number': traceback.format_exc().split('line ')[1].split(',')[0], \
+                                      'number_of_attempts': number_of_attempts})
     # positions_dict is a cleaned up version of the raw position information retrieved by exchange.fetch_positions()
         positions_dict = {}
         positions_dict['Entry Price'] = float(positions[0]['avgEntryPrice'])
@@ -434,11 +419,10 @@ class ConnectToExchange:
                         spot_balances[key] = raw_spot_balances[key]                    
             self.balances['Spot'] = spot_balances
         except Exception as error:
-            self.inCaseOfError(**{'Error': error, \
-                                  'Description': 'fetching Spot balances', \
-                                  'Pause Time': 0, \
-                                  'Program': 'CTE', \
-                                  'Line #': traceback.format_exc().split('line ')[1].split(',')[0]})
+            self.inCaseOfError(**{'error': error, \
+                                  'description': 'fetching Spot balances', \
+                                  'program': 'CTE', \
+                                  'line_number': traceback.format_exc().split('line ')[1].split(',')[0]})
     # Contract Trade Account balances are fetched and organized
         contract_balances = {}
         for available_symbol in self.availableSymbols[exchange_name]:
@@ -453,11 +437,10 @@ class ConnectToExchange:
                         contract_balances[available_symbol]['total'] = float(raw_contract_balance[available_symbol]['total'])
                         contract_balances[available_symbol]['dict'] = raw_contract_balance
                 except Exception as error:
-                    self.inCaseOfError(**{'Error': error, \
-                                          'Description': 'fetching ' + available_symbol + ' Contract balance', \
-                                          'Pause Time': 0, \
-                                          'Program': 'CTE', \
-                                          'Line #': traceback.format_exc().split('line ')[1].split(',')[0]})
+                    self.inCaseOfError(**{'error': error, \
+                                          'description': 'fetching ' + available_symbol + ' Contract balance', \
+                                          'program': 'CTE', \
+                                          'line_number': traceback.format_exc().split('line ')[1].split(',')[0]})
         self.balances['Contract'] = contract_balances
         return(self.balances)
 
@@ -1133,11 +1116,11 @@ class ConnectToExchange:
             try:
                 current_price = self.exchange.fetchTicker(symbol)['bid']
             except Exception as error:
-                self.inCaseOfError(**{'Error': error, \
-                                      'Description': 'checking the current BTC price', \
-                                      'Program': 'CTE', \
-                                      'Line #': traceback.format_exc().split('line ')[1].split(',')[0], \
-                                      '# of Attempts': number_of_attempts})
+                self.inCaseOfError(**{'error': error, \
+                                      'description': 'checking the current BTC price', \
+                                      'program': 'CTE', \
+                                      'line_number': traceback.format_exc().split('line ')[1].split(',')[0], \
+                                      'number_of_attempts': number_of_attempts})
                 current_price = False
                 if number_of_attempts % 5 == 0:
                     self.connect(self.exchangeAccounts['Default'])
