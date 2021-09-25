@@ -70,7 +70,7 @@ I started working on `ConnectToExchange` in 2017 during the last big bitcoin hyp
 
 ### Built With
 
-`Python`
+`Python3.6`
 
 [`CCXT`](https://github.com/ccxt/ccxt) - The fantastic `CCXT` library is critical to `ConnectToExchange`. Huge thanks to [@kroitor](https://github.com/kroitor) and the many other `CCXT` contributors that made this program possible.
 
