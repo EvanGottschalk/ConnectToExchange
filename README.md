@@ -91,7 +91,7 @@ Before using `ConnectToExchange`, you must first obtain an API key and secret fr
 
 ### Installation
 
-1. Install the `pandas` and [`CCXT`](https://github.com/ccxt/ccxt)` libraries, which are listed in `requirements.txt`. The easiest way to do this to download `requirements.txt` and use `pip`:
+1. Install the `pandas` and [`CCXT`](https://github.com/ccxt/ccxt) libraries, which are listed in `requirements.txt`. The easiest way to do this to download `requirements.txt` and use `pip`:
     ```
     pip install -r requirements.txt
     ```
