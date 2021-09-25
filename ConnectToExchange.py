@@ -22,10 +22,6 @@ from CustomEncryptor import CustomEncryptor
 # CCXT is the fantastic library that makes the interaction with cryptocurrency exchanges possible
 import ccxt
 
-# I ultimately stopped using this root assignment, but I may add it back
-##root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-##sys.path.append(root + '/python')
-
 # This function will create the ConnectToExchange class in a non-local scope, making it more secure
 def main():
     CTE = ConnectToExchange()
@@ -34,26 +30,27 @@ def main():
 
 class ConnectToExchange:
     def __init__(self):
-    # Toggle silent_mode to True to prevent all print statements that aren't error messages
+        # Toggle silent_mode to True to prevent all print statements that aren't error messages
         self.silent_mode = False
         self.GCT = GetCurrentTime()
         self.AP = AudioPlayer()
         self.CE = CustomEncryptor.CustomEncryptor()
-    # The improved_columns are simply the normal columns of an OHLCV, but with capitalization and a 'Time' column added. This variable helps with CSV exports
+        # The improved_columns are simply the normal columns of an OHLCV, but with capitalization and a 'Time' column added. This variable helps with CSV exports
         self.improved_columns = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'Time']
-    # The timeframes_All dict contains the most common time durations that cryptocurrency exchanges use in graphs of price over time
+        # The timeframes_All dict contains the most common time durations that cryptocurrency exchanges use in graphs of price over time
         self.timeframes_All = {'1m': '1m', '3m': '3m', '5m': '5m', '15m': '15m', '30m': '30m', '1h': '1h', '2h': '2h', '4h': '4h', '6h': '6h', '8h': '8h', '12h': '12h', '1d': '1d', '3d': '3d', '1w': '1w', '1M': '1M'}
-    # The activity logs are a history of every connection or other exchange-related action that has been made
-    # The Master Activity Log has every action from all time
-    # The Daily Activity Logs are broken up into individual days
+        # The activity logs are a history of every connection or other exchange-related action that has been made
+        # The Master Activity Log has every action from all time
+        # The Daily Activity Logs are broken up into individual days
         self.activityLog_Current = {}
         self.activity_log_location = 'Activity Logs/'
         if not(os.path.isdir('ConnectToExchange/Activity Logs')):
             os.makedirs('ConnectToExchange/Activity Logs')
-        self.errorLog = []
-    # This dict stores the API information for each account & exchange
-    # Fill this in with the exchanges & account names you use
-    # Enter your favorite exchange + account pair as 'Default' if you want the connect() function to connect with no inputs
+        # Information about any errors that occur are stored in error_log and exported to CSV
+        self.error_log = []
+        # This dict stores the API information for each account & exchange
+        # Fill this in with the exchanges & account names you use
+        # Enter your favorite exchange + account pair as 'Default' if you want the connect() function to connect with no inputs
         self.exchangeAccounts = {'Coinbase': {'apiKey Length': 32, \
                                               'secret Length': 88, \
                                               'Main': {'apiKey': '', 'secret': ''}, \
@@ -76,22 +73,22 @@ class ConnectToExchange:
         self.currentConnectionDetails = {'Exchange Name': '',
                                          'Account Name': '', \
                                          'Time of Acccess': str(datetime.now())}
-    # availableSymbols contains lists of the cryptocurrencies tradeable on a given exchange
-    # Whenever connect() is used, availableSymbols will be updated to have the exchange name as a new key and a list of the available symbols as the value
+        # availableSymbols contains lists of the cryptocurrencies tradeable on a given exchange
+        # Whenever connect() is used, availableSymbols will be updated to have the exchange name as a new key and a list of the available symbols as the value
         self.availableSymbols = {}
-    # EMA_smoother is an int that is used in calculating exponential moving averages. The most common value to use is 2. Feel free to change it
+        # EMA_smoother is an int that is used in calculating exponential moving averages. The most common value to use is 2. Feel free to change it
         self.EMA_smoother = 2
-        self.balances = False
-        self.exchange = False
+        self.balances = None
+        self.exchange = None
 
     def main_loop(self):
         print('CTE : main_loop initiated')
         exchange = self.connect()
-##    # I run getOHLCVs() on the 1 minute timeframe in the main loop to build up OHLCV data on my own machine via updateMasterOHLCVs()
-##    # This is useful because it is usually difficult to get minute-to-minute data through APIs unless the data is very recent
+        # I run getOHLCVs() on the 1 minute timeframe in the main loop to build up OHLCV data on my own machine via updateMasterOHLCVs()
+        # This is optional, but useful because it is usually difficult to get minute-to-minute data through APIs unless the data is very recent
         self.getOHLCVs('default', 'BTC', '1m', 1999, {}, 'no')
 
-# This function is for connecting to exchanges using API keys
+    # This is the primary function of the class. It creates the connections to cryptocurrency exchanges using API keys
     def connect(self, *args):
         connected = False
         while not(connected):
@@ -176,6 +173,101 @@ class ConnectToExchange:
                 connected = False
             connected = True
             del key, secret
+    # Now that the exchange has been connected to, variables are assigned and the ActivityLog is updated
+        self.currentConnectionDetails['Exchange Name'] = exchange_name
+        self.currentConnectionDetails['Account Name'] = account_name
+        self.exchange_name = exchange_name
+        self.account_name = account_name
+        date = self.GCT.getDateString()
+        timestamp = self.GCT.getTimeStamp()
+        time = self.GCT.getTimeString()
+        self.availableSymbols[exchange_name] = list(self.exchange.loadMarkets())
+    # If balances have already been fetched, they may refer to a different exchange or account. This updates self.balances to prevent confusion
+        if self.balances:
+            self.balances = self.getBalances()
+      # This section creates new entries in the Master Activity Log and Daily Activity Logs if they have not been used yet
+        try:
+            self.activityLog_Master = pickle.load(open(self.activity_log_location + exchange_name + '_ActivityLog_Master.pickle', 'rb'))
+            if not(self.silent_mode):
+                print('\nCTE : ' + exchange_name + ' ' + account_name + ' Master Activity Log loaded!')
+            largestTimestamp = max(self.activityLog_Master)
+            if not(self.silent_mode):
+                print('CTE : The most recent activity was on ' + self.activityLog_Master[largestTimestamp]['Date'] + '!')
+        except:
+            self.activityLog_Master = {}
+            if not(self.silent_mode):
+                print('CTE : No past Activity Log found!')
+        try:
+            self.activityLog_Daily = pickle.load(open(self.activity_log_location + exchange_name + '_ActivityLog_Daily_' + date + '.pickle', 'rb'))
+            if not(self.silent_mode):
+                print('CTE : Daily Activity Log loaded!')
+        except:
+            self.activityLog_Daily = {'Date': date, \
+                                      'Activity Log': {}}
+            if not(self.silent_mode):
+                print('CTE : No Daily Activity Log found for today!')
+      # This section creates new activity log entries and saves them
+        self.currentConnectionDetails['Time of Access'] = str(datetime.now())
+        self.activityLog_Current[timestamp] = {'Activity': 'Connected', \
+                                               'Date': date, \
+                                               'Time': time}
+        self.activityLog_Master.update(self.activityLog_Current)
+        self.activityLog_Daily['Activity Log'][time] = {'Activity': 'Connected', \
+                                                        'Time': time, \
+                                                        'Timestamp': timestamp}
+        pickle.dump(self.activityLog_Master, open(self.activity_log_location + exchange_name + '_ActivityLog_Master.pickle', 'wb'))
+        pickle.dump(self.activityLog_Daily, open(self.activity_log_location + exchange_name + '_ActivityLog_Daily_' + date + '.pickle', 'wb'))
+        daily_log_dataframe = pd.DataFrame(self.activityLog_Daily['Activity Log'])
+        daily_log_dataframe = daily_log_dataframe.T
+        daily_log_dataframe.to_csv(self.activity_log_location + exchange_name + '_ActivityLog_Daily_' + date + '.csv')
+        master_log_dataframe = pd.DataFrame(self.activityLog_Master)
+        master_log_dataframe = master_log_dataframe.T
+        master_log_dataframe.to_csv(self.activity_log_location + exchange_name + '_ActivityLog_Master.csv')
+        return(self.exchange)
+
+    # This is the primary function of the class. It creates the connections to cryptocurrency exchanges using API keys
+    def connect_NEW(self, exchange_name=self.exchangeAccounts['Default Exchange'], account_name=self.exchangeAccounts['Default Account']):
+        connected = False
+        # The API information matching exchange_name and account_name is retrieved
+        if self.exchangeAccounts[exchange_name][account_name]['apiKey'] == '':
+            self.fetch_API_key(exchange_name, account_name)
+        if len(self.exchangeAccounts[exchange_name][account_name]['apiKey']) > 100:
+            if self.CE:
+                try:
+                    key = self.CE.decrypt(self.exchangeAccounts[exchange_name][account_name]['apiKey'])[0:36]
+                    secret = self.CE.decrypt(self.exchangeAccounts[exchange_name][account_name]['secret'])[0:91]
+                except:
+                    print('CTE : ERROR! Failed to decrypt API key file.')
+                    continue
+            else:
+                key = self.exchangeAccounts[exchange_name][account_name]['apiKey']
+                secret = self.exchangeAccounts[exchange_name][account_name]['secret']
+        else:
+            key = self.exchangeAccounts[exchange_name][account_name]['apiKey']
+            secret = self.exchangeAccounts[exchange_name][account_name]['secret']
+        try:
+    # The API key has been retrieved. Now the connection to the exchange will be made
+        # Connects to Binance
+            if exchange_name == 'Binance':
+                self.exchange = ccxt.binance({'apiKey': key, \
+                                              'secret': secret, \
+                                              'timeout': 30000, \
+                                              'enableRateLimit': True, \
+                                              'options': {'adjustForTimeDifference': True}})           
+        # Connects to Kraken
+            elif exchange_name == 'Kraken':
+                self.exchange = ccxt.kraken({'apiKey': key, \
+                                             'secret': secret, \
+                                             'timeout': 30000, \
+                                             'enableRateLimit': True, \
+                                             'options': {'adjustForTimeDifference': True, \
+                                                         'defaultType': 'spot', \
+                                                         'postOnly': True}})
+        except:
+            print('CTE : ERROR! Failed to connect to ' + exchange_name)
+            connected = False
+        connected = True
+        del key, secret
     # Now that the exchange has been connected to, variables are assigned and the ActivityLog is updated
         self.currentConnectionDetails['Exchange Name'] = exchange_name
         self.currentConnectionDetails['Account Name'] = account_name
@@ -1193,7 +1285,7 @@ class ConnectToExchange:
                       'Program': program, \
                       'Line #': line_number, \
                       '# of Attempts': number_of_attempts}
-        self.errorLog.append(error_dict)
+        self.error_log.append(error_dict)
         self.AP.playSound('Navi Hey')
         if pause_time > 0:
             print('CTE : Pausing for ' + str(pause_time) + ' seconds')
