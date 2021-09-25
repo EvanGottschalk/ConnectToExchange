@@ -91,10 +91,10 @@ Before using `ConnectToExchange`, you must first obtain an API key and secret fr
 
 ### Installation
 
-1. Install [`CCXT`](https://github.com/ccxt/ccxt). This can be done in a number of ways. I used `pip`.
-   ```sh
-   pip install ccxt
-   ```
+1. Install the `pandas` and [`CCXT`](https://github.com/ccxt/ccxt)` libraries, which are listed in `requirements.txt`. The easiest way to do this to download `requirements.txt` and use `pip`:
+    ```
+    pip install -r requirements.txt
+    ```
 2. Download the `.py` files in from this repository (`ConnectToExchange.py`, `GetCurrentTime.py`, and optionally `AudioPlayer.py`).
 
 3. In the same folder as `ConnectToExchange.py`, create a `.txt` file to store your API information. Its name should start with the exchange you are using, followed by an underscore, followed by the name of the account you're using, and ending with `_API.txt`.
