@@ -228,7 +228,7 @@ class ConnectToExchange:
     # This is the primary function of the class. It creates the connections to cryptocurrency exchanges using API keys
     def connect_NEW(self, exchange_name=self.exchangeAccounts['Default Exchange'], account_name=self.exchangeAccounts['Default Account']):
         connected = False
-        # The API information matching exchange_name and account_name is retrieved
+        # The API information matching exchange_name and account_name is retrieved and read
         if self.exchangeAccounts[exchange_name][account_name]['apiKey'] == '':
             self.fetch_API_key(exchange_name, account_name)
         if len(self.exchangeAccounts[exchange_name][account_name]['apiKey']) > 100:
