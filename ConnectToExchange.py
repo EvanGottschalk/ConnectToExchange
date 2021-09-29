@@ -17,7 +17,7 @@ from AudioPlayer import AudioPlayer
 from GetCurrentTime import GetCurrentTime
 
 # CustomEncryptor.py is used to access encrypted API keys
-from CustomEncryptor import CustomEncryptor
+from Fluffy import Fluffy
 
 # CCXT is the fantastic library that makes the interaction with cryptocurrency exchanges possible
 import ccxt
@@ -34,7 +34,7 @@ class ConnectToExchange:
         self.silent_mode = False
         self.GCT = GetCurrentTime()
         self.AP = AudioPlayer()
-        self.CE = CustomEncryptor.CustomEncryptor()
+        self.CE = Fluffy.Fluffy()
         # The improved_columns are simply the normal columns of an OHLCV, but with capitalization and a 'Time' column added. This variable helps with CSV exports
         self.improved_columns = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'Time']
         # The timeframes_All dict contains the most common time durations that cryptocurrency exchanges use in graphs of price over time
@@ -59,7 +59,7 @@ class ConnectToExchange:
                                  'Binance': {'apiKey Length': 64, \
                                              'secret Length': 64, \
                                              'Main': {'apiKey': '', 'secret': ''}}, \
-                                 'Kraken': {'apiKey Length': 36, \
+                                 'Phemex': {'apiKey Length': 36, \
                                             'secret Length': 91, \
                                             'Main': {'apiKey': '', 'secret': ''}, \
                                             'Long 50x': {'apiKey': '', 'secret': ''}, \
@@ -67,9 +67,10 @@ class ConnectToExchange:
                                             'Long 50x Quick': {'apiKey': '', 'secret': ''}, \
                                             'Short 50x Quick': {'apiKey': '', 'secret': ''}, \
                                             'Monty': {'apiKey': '', 'secret': ''}}, \
-                                 'Default': 'Kraken Main', \
-                                 'Default Exchange': 'Kraken', \
-                                 'Default Account': 'Main'}
+                                 'Default': 'Phemex Main', \
+                                 'Default Exchange': 'Phemex', \
+                                 'Default Account': 'Main', \
+                                 'Default Type': 'futures'}
         self.currentConnectionDetails = {'Exchange Name': '',
                                          'Account Name': '', \
                                          'Time of Acccess': str(datetime.now())}
@@ -138,8 +139,8 @@ class ConnectToExchange:
             if len(self.exchangeAccounts[exchange_name][account_name]['apiKey']) > 100:
                 if self.CE:
                     try:
-                        key = self.CE.decrypt(self.exchangeAccounts[exchange_name][account_name]['apiKey'])[0:36]
-                        secret = self.CE.decrypt(self.exchangeAccounts[exchange_name][account_name]['secret'])[0:91]
+                        key = self.CE.sleep(self.exchangeAccounts[exchange_name][account_name]['apiKey'])[0:36]
+                        secret = self.CE.sleep(self.exchangeAccounts[exchange_name][account_name]['secret'])[0:91]
                     except:
                         print('CTE : ERROR! Failed to decrypt API key file.')
                         connected = False
@@ -159,14 +160,14 @@ class ConnectToExchange:
                                                   'timeout': 30000, \
                                                   'enableRateLimit': True, \
                                                   'options': {'adjustForTimeDifference': True}})           
-            # Connects to Kraken
-                elif exchange_name == 'Kraken':
-                    self.exchange = ccxt.kraken({'apiKey': key, \
+            # Connects to Phemex
+                elif exchange_name == 'Phemex':
+                    self.exchange = ccxt.phemex({'apiKey': key, \
                                                  'secret': secret, \
                                                  'timeout': 30000, \
                                                  'enableRateLimit': True, \
                                                  'options': {'adjustForTimeDifference': True, \
-                                                             'defaultType': 'spot', \
+                                                             'defaultType': 'futures', \
                                                              'postOnly': True}})
             except:
                 print('CTE : ERROR! Failed to connect to ' + exchange_name)
@@ -226,99 +227,99 @@ class ConnectToExchange:
         return(self.exchange)
 
     # This is the primary function of the class. It creates the connections to cryptocurrency exchanges using API keys
-    def connect_NEW(self, exchange_name=self.exchangeAccounts['Default Exchange'], account_name=self.exchangeAccounts['Default Account']):
+    def connect_NEW(self, exchange_name=None, account_name=None):
+        if not(exchange_name) or str(exchange_name).lower() == 'default':
+            exchange_name = self.exchangeAccounts['Default Exchange']
+        if not(account_name) or str(account_name).lower() == 'default':
+            account_name = self.exchangeAccounts['Default Account']
         connected = False
         # The API information matching exchange_name and account_name is retrieved and read
         if self.exchangeAccounts[exchange_name][account_name]['apiKey'] == '':
             self.fetch_API_key(exchange_name, account_name)
         if len(self.exchangeAccounts[exchange_name][account_name]['apiKey']) > 100:
-            if self.CE:
-                try:
-                    key = self.CE.decrypt(self.exchangeAccounts[exchange_name][account_name]['apiKey'])[0:36]
-                    secret = self.CE.decrypt(self.exchangeAccounts[exchange_name][account_name]['secret'])[0:91]
-                except:
-                    print('CTE : ERROR! Failed to decrypt API key file.')
-                    continue
-            else:
-                key = self.exchangeAccounts[exchange_name][account_name]['apiKey']
-                secret = self.exchangeAccounts[exchange_name][account_name]['secret']
+            try:
+                key = self.CE.sleep(self.exchangeAccounts[exchange_name][account_name]['apiKey'])[0:36]
+                secret = self.CE.sleep(self.exchangeAccounts[exchange_name][account_name]['secret'])[0:91]
+            except Exception as error:
+                self.inCaseOfError(**{'error': error, \
+                                      'description': 'reading API key file', \
+                                      'program': 'CTE', \
+                                      'line_number': traceback.format_exc().split('line ')[1].split(',')[0]})
         else:
             key = self.exchangeAccounts[exchange_name][account_name]['apiKey']
             secret = self.exchangeAccounts[exchange_name][account_name]['secret']
         try:
-    # The API key has been retrieved. Now the connection to the exchange will be made
-        # Connects to Binance
-            if exchange_name == 'Binance':
-                self.exchange = ccxt.binance({'apiKey': key, \
-                                              'secret': secret, \
-                                              'timeout': 30000, \
-                                              'enableRateLimit': True, \
-                                              'options': {'adjustForTimeDifference': True}})           
-        # Connects to Kraken
-            elif exchange_name == 'Kraken':
-                self.exchange = ccxt.kraken({'apiKey': key, \
-                                             'secret': secret, \
-                                             'timeout': 30000, \
-                                             'enableRateLimit': True, \
-                                             'options': {'adjustForTimeDifference': True, \
-                                                         'defaultType': 'spot', \
-                                                         'postOnly': True}})
-        except:
-            print('CTE : ERROR! Failed to connect to ' + exchange_name)
+        # The API connection to the exchange is made
+            self.exchange = ccxt.phemex({'apiKey': key, \
+                                         'secret': secret, \
+                                         'timeout': 30000, \
+                                         'enableRateLimit': True, \
+                                         'options': {'adjustForTimeDifference': True, \
+                                                     'defaultType': self.exchangeAccounts['Default Type'], \
+                                                     'postOnly': True}})
+            connected = True
+        except Exception as error:
+            self.inCaseOfError(**{'error': error, \
+                                  'description': 'connecting to the exchange', \
+                                  'program': 'CTE', \
+                                  'line_number': traceback.format_exc().split('line ')[1].split(',')[0]})
             connected = False
-        connected = True
         del key, secret
-    # Now that the exchange has been connected to, variables are assigned and the ActivityLog is updated
-        self.currentConnectionDetails['Exchange Name'] = exchange_name
-        self.currentConnectionDetails['Account Name'] = account_name
-        self.exchange_name = exchange_name
-        self.account_name = account_name
-        date = self.GCT.getDateString()
-        timestamp = self.GCT.getTimeStamp()
-        time = self.GCT.getTimeString()
-        self.availableSymbols[exchange_name] = list(self.exchange.loadMarkets())
-    # If balances have already been fetched, they may refer to a different exchange or account. This updates self.balances to prevent confusion
-        if self.balances:
-            self.balances = self.getBalances()
-      # This section creates new entries in the Master Activity Log and Daily Activity Logs if they have not been used yet
-        try:
-            self.activityLog_Master = pickle.load(open(self.activity_log_location + exchange_name + '_ActivityLog_Master.pickle', 'rb'))
-            if not(self.silent_mode):
-                print('\nCTE : ' + exchange_name + ' ' + account_name + ' Master Activity Log loaded!')
-            largestTimestamp = max(self.activityLog_Master)
-            if not(self.silent_mode):
-                print('CTE : The most recent activity was on ' + self.activityLog_Master[largestTimestamp]['Date'] + '!')
-        except:
-            self.activityLog_Master = {}
-            if not(self.silent_mode):
-                print('CTE : No past Activity Log found!')
-        try:
-            self.activityLog_Daily = pickle.load(open(self.activity_log_location + exchange_name + '_ActivityLog_Daily_' + date + '.pickle', 'rb'))
-            if not(self.silent_mode):
-                print('CTE : Daily Activity Log loaded!')
-        except:
-            self.activityLog_Daily = {'Date': date, \
-                                      'Activity Log': {}}
-            if not(self.silent_mode):
-                print('CTE : No Daily Activity Log found for today!')
-      # This section creates new activity log entries and saves them
-        self.currentConnectionDetails['Time of Access'] = str(datetime.now())
-        self.activityLog_Current[timestamp] = {'Activity': 'Connected', \
-                                               'Date': date, \
-                                               'Time': time}
-        self.activityLog_Master.update(self.activityLog_Current)
-        self.activityLog_Daily['Activity Log'][time] = {'Activity': 'Connected', \
-                                                        'Time': time, \
-                                                        'Timestamp': timestamp}
-        pickle.dump(self.activityLog_Master, open(self.activity_log_location + exchange_name + '_ActivityLog_Master.pickle', 'wb'))
-        pickle.dump(self.activityLog_Daily, open(self.activity_log_location + exchange_name + '_ActivityLog_Daily_' + date + '.pickle', 'wb'))
-        daily_log_dataframe = pd.DataFrame(self.activityLog_Daily['Activity Log'])
-        daily_log_dataframe = daily_log_dataframe.T
-        daily_log_dataframe.to_csv(self.activity_log_location + exchange_name + '_ActivityLog_Daily_' + date + '.csv')
-        master_log_dataframe = pd.DataFrame(self.activityLog_Master)
-        master_log_dataframe = master_log_dataframe.T
-        master_log_dataframe.to_csv(self.activity_log_location + exchange_name + '_ActivityLog_Master.csv')
-        return(self.exchange)
+        if not(connected):
+            print('CTE : ERROR! Failed to connect to exchange.')
+            return(None)
+        else:
+            # Variables are assigned and the ActivityLog is updated
+            self.currentConnectionDetails['Exchange Name'] = exchange_name
+            self.currentConnectionDetails['Account Name'] = account_name
+            self.exchange_name = exchange_name
+            self.account_name = account_name
+            date = self.GCT.getDateString()
+            timestamp = self.GCT.getTimeStamp()
+            time = self.GCT.getTimeString()
+            self.availableSymbols[exchange_name] = list(self.exchange.loadMarkets())
+            # Balances are automatically updated if they have been previously fetched
+            if self.balances:
+                self.balances = self.getBalances()
+            # New entries are added to the Master Activity Log and Daily Activity Logs
+            try:
+                self.activityLog_Master = pickle.load(open(self.activity_log_location + exchange_name + '_ActivityLog_Master.pickle', 'rb'))
+                if not(self.silent_mode):
+                    print('\nCTE : ' + exchange_name + ' ' + account_name + ' Master Activity Log loaded!')
+                largestTimestamp = max(self.activityLog_Master)
+                if not(self.silent_mode):
+                    print('CTE : The most recent activity was on ' + self.activityLog_Master[largestTimestamp]['Date'] + '!')
+            except FileNotFoundError:
+                self.activityLog_Master = {}
+                if not(self.silent_mode):
+                    print('CTE : No past Activity Log found!')
+            try:
+                self.activityLog_Daily = pickle.load(open(self.activity_log_location + exchange_name + '_ActivityLog_Daily_' + date + '.pickle', 'rb'))
+                if not(self.silent_mode):
+                    print('CTE : Daily Activity Log loaded!')
+            except FileNotFoundError:
+                self.activityLog_Daily = {'Date': date, \
+                                          'Activity Log': {}}
+                if not(self.silent_mode):
+                    print('CTE : No Daily Activity Log found for today!')
+            # A new activity log entry si created and saved
+            self.currentConnectionDetails['Time of Access'] = str(datetime.now())
+            self.activityLog_Current[timestamp] = {'Activity': 'Connected', \
+                                                   'Date': date, \
+                                                   'Time': time}
+            self.activityLog_Master.update(self.activityLog_Current)
+            self.activityLog_Daily['Activity Log'][time] = {'Activity': 'Connected', \
+                                                            'Time': time, \
+                                                            'Timestamp': timestamp}
+            pickle.dump(self.activityLog_Master, open(self.activity_log_location + exchange_name + '_ActivityLog_Master.pickle', 'wb'))
+            pickle.dump(self.activityLog_Daily, open(self.activity_log_location + exchange_name + '_ActivityLog_Daily_' + date + '.pickle', 'wb'))
+            daily_log_dataframe = pd.DataFrame(self.activityLog_Daily['Activity Log'])
+            daily_log_dataframe = daily_log_dataframe.T
+            daily_log_dataframe.to_csv(self.activity_log_location + exchange_name + '_ActivityLog_Daily_' + date + '.csv')
+            master_log_dataframe = pd.DataFrame(self.activityLog_Master)
+            master_log_dataframe = master_log_dataframe.T
+            master_log_dataframe.to_csv(self.activity_log_location + exchange_name + '_ActivityLog_Master.csv')
+            return(self.exchange)
 
 # This function is for retrieving API keys from a .txt file
 # Each file should have the API information for one account, end in '_API.txt', and have the API key on the first line and the API secret on the second line
