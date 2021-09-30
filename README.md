@@ -70,7 +70,7 @@ I started working on `ConnectToExchange` in 2017 during the last big bitcoin hyp
 
 ### Built With
 
-* `Python3.6`
+* `Python 3.6`
 
 * `Pandas`
 
@@ -85,13 +85,15 @@ I started working on `ConnectToExchange` in 2017 during the last big bitcoin hyp
 <!-- GETTING STARTED -->
 ## Getting Started
 
+`OperateExchange` is easy to get up and running. Let [me](https://github.com/EvanGottschalk) know if you have any trouble! I'm always trying to make installation as smooth as possible.
+
 ### Prerequisites
 
 Before using `ConnectToExchange`, you must first obtain an API key and secret from the cryptocurrency exchange of their choosing. You also need to install the [`CCXT`](https://github.com/ccxt/ccxt) library.
 
 ### Installation
 
-1. Install the `pandas` and [`CCXT`](https://github.com/ccxt/ccxt) libraries, which are listed in `requirements.txt`. The easiest way to do this to download `requirements.txt` and use `pip`:
+1. Install the `pandas` and [`CCXT`](https://github.com/ccxt/ccxt) libraries, which are listed in [`requirements.txt`](https://github.com/EvanGottschalk/ConnectToExchange/blob/main/requirements.txt). The easiest way to do this to download [`requirements.txt`](https://github.com/EvanGottschalk/ConnectToExchange/blob/main/requirements.txt) and use `pip`:
     ```
     pip install -r requirements.txt
     ```
