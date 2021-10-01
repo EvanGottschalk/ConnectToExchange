@@ -105,7 +105,7 @@ Before using `ConnectToExchange`, you must first obtain an API key and secret fr
 
     If your API key is `view-only`, you can save your cryptocurrency exchange API key on the 1st line, and your API secret on the 2nd. However, **if your API key has `trade` priveleges, you should save an encrypted version of both your key and secret on those lines instead.**
 
-    To encrypt your API information, I recommend using `CustomEncryptor.py`, which can be downloaded here: [github.com/EvanGottschalk/CustomEncryptor](https://github.com/EvanGottschalk/CustomEncryptor)
+    To encrypt your API information, I recommend using [`CustomEncryptor.py`](https://github.com/EvanGottschalk/CustomEncryptor)
 
 4. Run `ConnectToExchange.py`
 
@@ -154,7 +154,7 @@ Distributed under the GNU GPL-3 License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Evan Gottschalk - [@Fort1Evan](https://twitter.com/Fort1Evan) - magnus5557@gmail.com
+Evan Gottschalk - [@Fort1Evan](https://twitter.com/Fort1Evan) - evan@fort1e.com
 
 Project Link: [https://github.com/EvanGottschalk/ConnectToExchange](https://github.com/EvanGottschalk/ConnectToExchange)
 
