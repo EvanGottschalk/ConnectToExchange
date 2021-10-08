@@ -17,7 +17,7 @@ from AudioPlayer import AudioPlayer
 from GetCurrentTime import GetCurrentTime
 
 # CustomEncryptor.py is used to access encrypted API keys
-from Fluffy import Fluffy
+from CustomEncryptor import CustomEncryptor
 
 # CCXT is the fantastic library that makes the interaction with cryptocurrency exchanges possible
 import ccxt
@@ -34,7 +34,7 @@ class ConnectToExchange:
         self.silent_mode = False
         self.GCT = GetCurrentTime()
         self.AP = AudioPlayer()
-        self.CE = Fluffy.Fluffy()
+        self.CE = CustomEncryptor.CustomEncryptor()
         # The improved_columns are simply the normal columns of an OHLCV, but with capitalization and a 'Time' column added. This variable helps with CSV exports
         self.improved_columns = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume', 'Time']
         # The timeframes_All dict contains the most common time durations that cryptocurrency exchanges use in graphs of price over time
@@ -59,7 +59,7 @@ class ConnectToExchange:
                                  'Binance': {'apiKey Length': 64, \
                                              'secret Length': 64, \
                                              'Main': {'apiKey': '', 'secret': ''}}, \
-                                 'Phemex': {'apiKey Length': 36, \
+                                 'Kraken': {'apiKey Length': 36, \
                                             'secret Length': 91, \
                                             'Main': {'apiKey': '', 'secret': ''}, \
                                             'Long 50x': {'apiKey': '', 'secret': ''}, \
@@ -67,10 +67,10 @@ class ConnectToExchange:
                                             'Long 50x Quick': {'apiKey': '', 'secret': ''}, \
                                             'Short 50x Quick': {'apiKey': '', 'secret': ''}, \
                                             'Monty': {'apiKey': '', 'secret': ''}}, \
-                                 'Default': 'Phemex Main', \
-                                 'Default Exchange': 'Phemex', \
+                                 'Default': 'Kraken Main', \
+                                 'Default Exchange': 'Kraken', \
                                  'Default Account': 'Main', \
-                                 'Default Type': 'futures'}
+                                 'Default Type': 'spot'}
         self.currentConnectionDetails = {'Exchange Name': '',
                                          'Account Name': '', \
                                          'Time of Acccess': str(datetime.now())}
@@ -139,8 +139,8 @@ class ConnectToExchange:
             if len(self.exchangeAccounts[exchange_name][account_name]['apiKey']) > 100:
                 if self.CE:
                     try:
-                        key = self.CE.sleep(self.exchangeAccounts[exchange_name][account_name]['apiKey'])[0:36]
-                        secret = self.CE.sleep(self.exchangeAccounts[exchange_name][account_name]['secret'])[0:91]
+                        key = self.CE.decrypt(self.exchangeAccounts[exchange_name][account_name]['apiKey'])[0:36]
+                        secret = self.CE.decrypt(self.exchangeAccounts[exchange_name][account_name]['secret'])[0:91]
                     except:
                         print('CTE : ERROR! Failed to decrypt API key file.')
                         connected = False
@@ -160,14 +160,14 @@ class ConnectToExchange:
                                                   'timeout': 30000, \
                                                   'enableRateLimit': True, \
                                                   'options': {'adjustForTimeDifference': True}})           
-            # Connects to Phemex
-                elif exchange_name == 'Phemex':
-                    self.exchange = ccxt.phemex({'apiKey': key, \
+            # Connects to Kraken
+                elif exchange_name == 'Kraken':
+                    self.exchange = ccxt.kraken({'apiKey': key, \
                                                  'secret': secret, \
                                                  'timeout': 30000, \
                                                  'enableRateLimit': True, \
                                                  'options': {'adjustForTimeDifference': True, \
-                                                             'defaultType': 'futures', \
+                                                             'defaultType': 'spot', \
                                                              'postOnly': True}})
             except:
                 print('CTE : ERROR! Failed to connect to ' + exchange_name)
@@ -238,8 +238,8 @@ class ConnectToExchange:
             self.fetch_API_key(exchange_name, account_name)
         if len(self.exchangeAccounts[exchange_name][account_name]['apiKey']) > 100:
             try:
-                key = self.CE.sleep(self.exchangeAccounts[exchange_name][account_name]['apiKey'])[0:36]
-                secret = self.CE.sleep(self.exchangeAccounts[exchange_name][account_name]['secret'])[0:91]
+                key = self.CE.decrypt(self.exchangeAccounts[exchange_name][account_name]['apiKey'])[0:36]
+                secret = self.CE.decrypt(self.exchangeAccounts[exchange_name][account_name]['secret'])[0:91]
             except Exception as error:
                 self.inCaseOfError(**{'error': error, \
                                       'description': 'reading API key file', \
@@ -249,8 +249,8 @@ class ConnectToExchange:
             key = self.exchangeAccounts[exchange_name][account_name]['apiKey']
             secret = self.exchangeAccounts[exchange_name][account_name]['secret']
         try:
-        # The API connection to the exchange is made
-            self.exchange = ccxt.phemex({'apiKey': key, \
+            # The API connection to the exchange is made
+            self.exchange = ccxt.kraken({'apiKey': key, \
                                          'secret': secret, \
                                          'timeout': 30000, \
                                          'enableRateLimit': True, \
@@ -302,7 +302,7 @@ class ConnectToExchange:
                                           'Activity Log': {}}
                 if not(self.silent_mode):
                     print('CTE : No Daily Activity Log found for today!')
-            # A new activity log entry si created and saved
+            # A new activity log entry is created and saved
             self.currentConnectionDetails['Time of Access'] = str(datetime.now())
             self.activityLog_Current[timestamp] = {'Activity': 'Connected', \
                                                    'Date': date, \
@@ -348,25 +348,16 @@ class ConnectToExchange:
             print('CTE : ERROR! Failed to find API Key file.')
 
 # This function is for retrieving information about open trading positions
-    def getPositions(self, *args):
-    # The only argument getPositions takes is an exchange name, which is optional
-    # If called with no argument, it will try to see if it's already connected to an exchange. If it's not, it connects to the default exchange
-        if len(args) > 0:
-            self.connect(args[0])
-        else:
-            try:
-                self.exchange.fetchTicker('BTC/USDT')
-            except:
-                try:
-                    self.exchange.fetchTicker('BTC/USD')
-                except:
-                    self.connect(self.exchangeAccounts['Default'])
+    def getPositions(self, exchange=None):
+        if exchange:
+            self.connect(exchange)
+        elif not(self.exchange):            
+            self.connect(self.exchangeAccounts['Default'])
         positions = False
         number_of_attempts = 0
         while not(positions):
             number_of_attempts += 1
             try:
-            # This is the line that uses CCXT to actually get the information about the position
                 positions = self.exchange.fetch_positions(None, {'currency':'BTC'})
             except Exception as error:
                 positions = False
@@ -375,7 +366,7 @@ class ConnectToExchange:
                                       'program': 'CTE', \
                                       'line_number': traceback.format_exc().split('line ')[1].split(',')[0], \
                                       'number_of_attempts': number_of_attempts})
-    # positions_dict is a cleaned up version of the raw position information retrieved by exchange.fetch_positions()
+        # positions_dict is a tidier version of the raw position information retrieved by exchange.fetch_positions()
         positions_dict = {}
         positions_dict['Entry Price'] = float(positions[0]['avgEntryPrice'])
         positions_dict['Side'] = positions[0]['side']
